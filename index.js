@@ -1,16 +1,62 @@
+let myLeads = []
 const inputBtn = document.getElementById("input-btn")
-let myLeads = ["www.awesome.com","www.google.com"]
 const inputEl = document.getElementById("input-el")
 const ulEl = document.getElementById("ul-el")
+const deleteBtn = document.getElementById("delete-btn")
+const tabBtn = document.getElementById("tab-btn")
 
-inputBtn.addEventListener("click",function(){ 
-        myLeads.push(inputEl.value)  
+const leadsFromLocalStorage = JSON.parse(localStorage.getItem("myLeads"))
+
+//keeps the data saved even after refresh
+if (leadsFromLocalStorage){
+    myLeads = leadsFromLocalStorage
+    render(myLeads)
+}
+
+function render(leads){
+    let listItems = "" // to hold the items
+    for (let i = 0; i < leads.length; i++){
+        //listItems += "<li><a href=' " + myLeads[i] + " ' target='_blank'>" + myLeads[i] + "</a></li>"
+        listItems += `
+        <li>
+            <a href="${leads[i]} target="_blank"> 
+                ${leads[i]} 
+            </a>
+        </li>`
+        
+    }
+    
+    ulEl.innerHTML = listItems
+    // OR
+        // const li = document.createElement("li")
+        // li.textContent = myLeads[i]
+        // ulEl.append(li)
+
+}
+
+deleteBtn.addEventListener("dblclick",function(){
+    localStorage.clear()
+    myLeads = []
+    render(myLeads)
 })
 
-for (let i = 0; i < myLeads.length; i++){
-    ulEl.innerHTML += "<li>" + myLeads[i] + "</li>"
-    // OR
-    // const li = document.createElement("li")
-    // li.textContent = myLeads[i]
-    // ulEl.append(li)
-}
+inputBtn.addEventListener("click",function(){ 
+        myLeads.push(inputEl.value)
+        inputEl.value = ""
+        localStorage.setItem("myLeads", JSON.stringify(myLeads))
+        render(myLeads)  
+})
+
+
+tabBtn.addEventListener("click", function(){
+
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        myLeads.push(tabs[0].url)
+        localStorage.setItem("myLeads",JSON.stringify(myLeads))
+        render(myLeads)
+      });
+
+})
+
+
+
